@@ -11,7 +11,7 @@ import pathlib
 DIR=pathlib.Path(__file__).parent.absolute()
 
 import joblib 
-answers = joblib.load(str(DIR)+"/answers_Lab1.joblib")
+answers = joblib.load(str(DIR)+"/answers_Chapter1.joblib")
 
 # Import the student solutions
 import Lab1_helper as helper
