@@ -47,7 +47,23 @@ from sklearn.metrics import mean_absolute_error
 def test_1():
     reg = py566.base.MeanRegressor()
     reg.fit(X_train,t_train)
-    results = pd.DataFrame([{'Method':'MeanRegressor','Train MAE':1-mean_absolute_error(t_train,reg.predict(X_train)),'Test MAE':mean_absolute_error(t_test,reg.predict(X_test))}])
+    results = pd.DataFrame([{'Method':'MeanRegressor','Train MAE':mean_absolute_error(t_train,reg.predict(X_train)),'Test MAE':mean_absolute_error(t_test,reg.predict(X_test))}])
     results_1 = results.set_index('Method').loc['MeanRegressor']
     answers_1 = answers.set_index('Method').loc['MeanRegressor']
+    assert (results_1 == answers_1).all()
+    
+def test_2():
+    reg = py566.tree.StumpRegressor()
+    reg.fit(X_train,t_train)
+    results = pd.DataFrame([{'Method':'StumpRegressor','Train MAE':mean_absolute_error(t_train,reg.predict(X_train)),'Test MAE':mean_absolute_error(t_test,reg.predict(X_test))}])
+    results_1 = results.set_index('Method').loc['StumpRegressor']
+    answers_1 = answers.set_index('Method').loc['StumpRegressor']
+    assert (results_1 == answers_1).all()
+    
+def test_3():
+    reg = py566.ensemble.BaggingRegressor(get_learner_func=lambda: py566.tree.StumpRegressor())
+    reg.fit(X_train,t_train)
+    results = pd.DataFrame([{'Method':'BaggingStumpRegressor 10','Train MAE':mean_absolute_error(t_train,reg.predict(X_train)),'Test MAE':mean_absolute_error(t_test,reg.predict(X_test))}])
+    results_1 = results.set_index('Method').loc['BaggingStumpRegressor 10']
+    answers_1 = answers.set_index('Method').loc['BaggingStumpRegressor 10']
     assert (results_1 == answers_1).all()

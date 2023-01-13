@@ -15,11 +15,14 @@ def boostrap_sample(X,y):
     return X,y
 
 class BaggingRegressor(BaseEstimator, RegressorMixin):
-    def __init__(self, ntrees=10, get_learner_func=get_learner_example):
+    def __init__(self, ntrees=10, get_learner_func=get_learner_example,seed=42):
         self._get_learner_func = get_learner_func
         self._ntrees = ntrees
+        self._seed = seed
             
     def fit(self, X, y):
+        np.random.seed(self._seed)
+
         self._trees = []
         for i in range(self._ntrees):
             # Your solution here
