@@ -12,6 +12,7 @@ DIR=pathlib.Path(__file__).parent.absolute()
 sys.path.insert(0,f'{DIR}/../')
 
 import py566
+from py566 import tree_extension
 
 import joblib 
 answers = joblib.load(str(DIR)+"/answers_Chapter1.joblib")
@@ -66,4 +67,41 @@ def test_3():
     results = pd.DataFrame([{'Method':'BaggingStumpRegressor 10','Train MAE':mean_absolute_error(t_train,reg.predict(X_train)),'Test MAE':mean_absolute_error(t_test,reg.predict(X_test))}])
     results_1 = results.set_index('Method').loc['BaggingStumpRegressor 10']
     answers_1 = answers.set_index('Method').loc['BaggingStumpRegressor 10']
+    print(results_1)
+    print(answers_1)
     assert (results_1 == answers_1).all()
+
+def test_4():
+    #test if the extended tree regressor is better than stump regressor
+    reg = py566.tree.StumpRegressor()
+    reg.fit(X_train, t_train)
+    old_results = pd.DataFrame([{'Method': 'StumpRegressor',
+                             'Train MAE': mean_absolute_error(t_train, reg.predict(X_train)),
+                             'Test MAE': mean_absolute_error(t_test, reg.predict(X_test))}])
+    old_results_1 = old_results.set_index('Method').loc['StumpRegressor']
+    extension = py566.tree_extension.DecisionTreeRegressor(depth=2)
+    extension.fit(X_train,t_train)
+    new_results = pd.DataFrame([{'Method': 'StumpRegressor',
+                                 'Train MAE': mean_absolute_error(t_train, extension.predict(X_train)),
+                                 'Test MAE': mean_absolute_error(t_test, extension.predict(X_test))}])
+    new_results_1 = new_results.set_index('Method').loc['StumpRegressor']
+    assert (old_results_1['Test MAE'] > new_results_1).all()
+
+def test_5():
+    #test if extension bagging ensemble is better than standard implementation bagging ensemble
+    reg = py566.ensemble.BaggingRegressor(get_learner_func=lambda: py566.tree.StumpRegressor())
+    reg.fit(X_train, t_train)
+    results = pd.DataFrame([{'Method': 'BaggingStumpRegressor 10',
+                             'Train MAE': mean_absolute_error(t_train, reg.predict(X_train)),
+                             'Test MAE': mean_absolute_error(t_test, reg.predict(X_test))}])
+    old_results_1 = results.set_index('Method').loc['BaggingStumpRegressor 10']
+    extension = py566.ensemble.BaggingRegressor(get_learner_func=lambda: py566.tree_extension.DecisionTreeRegressor())
+    extension.fit(X_train, t_train)
+    results = pd.DataFrame([{'Method': 'BaggingStumpRegressor 10',
+                             'Train MAE': mean_absolute_error(t_train, extension.predict(X_train)),
+                             'Test MAE': mean_absolute_error(t_test, extension.predict(X_test))}])
+    new_results_1 = results.set_index('Method').loc['BaggingStumpRegressor 10']
+    assert (old_results_1['Test MAE'] > new_results_1).all()
+
+if __name__ == '__main__':
+    test_3()

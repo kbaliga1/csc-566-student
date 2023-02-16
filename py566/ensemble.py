@@ -26,7 +26,8 @@ class BaggingRegressor(BaseEstimator, RegressorMixin):
         self._trees = []
         for i in range(self._ntrees):
             # Your solution here
-            pass
+            sampleX, sampley = boostrap_sample(X,y)
+            self._trees.append(self._get_learner_func().fit(sampleX,sampley))
 
         return self
     

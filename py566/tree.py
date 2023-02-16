@@ -30,6 +30,21 @@ class StumpRegressor(BaseEstimator, RegressorMixin):
         self.sample_param_here = sample_param_here
             
     def fit(self, X, y):
+        #find which column gives the best gain ratio
+        self._split_column = ""
+        gain = 0
+        for label in X.columns:
+            curGain = gain_ratio(y,X[label])
+            if curGain > gain:
+                gain = curGain
+                self._split_column = label
+
+        #create predictions for each possible value in split column
+        self._predictions = pd.concat([X,y],axis=1).groupby(self._split_column)[y.name].mean()
+
+        #calculate default value for y
+        self._mean = y.mean()
+
         return self
     
     def predict(self, X):
